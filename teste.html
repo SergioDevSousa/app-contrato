@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Testar Geração de Contrato</title>
+</head>
+<body>
+  <h1>Gerar Contrato</h1>
+  <form id="contratoForm">
+    <label>Contratante: <input type="text" name="contratante" required></label><br><br>
+    <label>Contratado: <input type="text" name="contratado" required></label><br><br>
+    <label>Serviço: <input type="text" name="servico" required></label><br><br>
+    <label>Valor: <input type="text" name="valor" required></label><br><br>
+    <label>Data: <input type="text" name="data" placeholder="17 de abril de 2025" required></label><br><br>
+    <label>Cidade: <input type="text" name="cidade" required></label><br><br>
+    <button type="submit">Enviar</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('contratoForm');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const jsonData = {};
+
+      formData.forEach((value, key) => {
+        jsonData[key] = value;
+      });
+
+      const response = await fetch('http://localhost:3000/api/contrato', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(jsonData),
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'contrato.docx';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        URL.revokeObjectURL(url);
+      } else {
+        const error = await response.json();
+        alert('Erro ao gerar contrato: ' + (error.detail || error.error));
+      }
+    });
+  </script>
+</body>
+</html>
